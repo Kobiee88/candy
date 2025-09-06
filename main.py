@@ -4,6 +4,7 @@ from constants import *
 from player import Player
 from playarea import Playarea
 from interface import Interface
+from damage_sources.beam import Beam
 '''from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot'''
@@ -23,8 +24,11 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     playarea = Playarea(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     drawable.add(playarea)
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)  # Create player at center of screen
-    interface = Interface(player)
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50)  # Create player at center of screen
+    beam = Beam()  # Example beam
+    updatable.add(beam)
+    drawable.add(beam)
+    interface = Interface(player, beam)
     drawable.add(interface)
     #asteroid_field = AsteroidField()  # Create asteroid field
     #screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -45,6 +49,9 @@ def main():
                     if asteroid.check_collision(shot):
                         shot.kill()
                         asteroid.split()'''
+        beam_clipped = player.rect.clipline(PLAYAREA_RADIUS, PLAYAREA_RADIUS, beam.returnEndpoint().x, beam.returnEndpoint().y)
+        if beam.active and beam_clipped:
+            player.take_damage(1)
         pygame.display.flip()  # Update the display
         dt = pygame.time.Clock().tick(60) / 1000  # Limit to 60 FPS
 

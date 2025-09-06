@@ -10,6 +10,9 @@ class Player(CircleShape):
         self.blink_timer = 0.0  # Timer for blink cooldown
         self.stamina = PLAYER_MAX_STAMINA  # Player stamina for sprinting
         self.stamina_recovery_cooldown = 0.0
+        self.health = PLAYER_MAX_HEALTH  # Player health
+        self.image = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
         #self.image = pygame.image.load("./images/player.png").convert_alpha()  # Use your image file here
         #self.image = pygame.transform.smoothscale(self.image, (self.radius*2, self.radius*2))  # Optional: scale to fit
 
@@ -70,6 +73,7 @@ class Player(CircleShape):
             self.move(-dt * speed)
         if keys[pygame.K_SPACE]:
             self.blinkForward()
+        self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
 
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -88,7 +92,7 @@ class Player(CircleShape):
     def blinkForward(self):
         if self.blink_timer <= 0:
             forward = pygame.Vector2(0, 1).rotate(self.rotation)
-            new_position = self.position + forward * PLAYER_SPEED * 0.6
+            new_position = self.position + forward * PLAYER_SPEED * 0.8
             playarea_center = pygame.Vector2(PLAYAREA_RADIUS, PLAYAREA_RADIUS)
             if (new_position - playarea_center).length() + self.radius < PLAYAREA_RADIUS:
                 self.position = new_position
@@ -107,4 +111,10 @@ class Player(CircleShape):
         elif self.stamina_recovery_cooldown <= 0:
             self.stamina_recovery_cooldown = 1.0
         return 1.0
+    
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health < 0:
+            self.health = 0
+        # You can add additional logic here, such as triggering a death event if health reaches 0
 
