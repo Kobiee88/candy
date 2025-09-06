@@ -1,13 +1,12 @@
 import pygame
 import sys
+import random
 from constants import *
 from player import Player
 from playarea import Playarea
 from interface import Interface
 from damage_sources.beam import Beam
-'''from asteroid import Asteroid
-from asteroidfield import AsteroidField
-from shot import Shot'''
+from damage_sources.meteor import Meteor
 
 def main():
     pygame.init()
@@ -49,6 +48,14 @@ def main():
                     if asteroid.check_collision(shot):
                         shot.kill()
                         asteroid.split()'''
+        if random.random() < METEOR_SPAWN_CHANCE and len(updatable.sprites()) < 10:
+            angle = random.uniform(0, 360)
+            distance = random.uniform(0, PLAYAREA_RADIUS)
+            spawn_x = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).x
+            spawn_y = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).y
+            meteor = Meteor((spawn_x, spawn_y), player)
+            updatable.add(meteor)
+            drawable.add(meteor)
         beam_clipped = player.rect.clipline(PLAYAREA_RADIUS, PLAYAREA_RADIUS, beam.returnEndpoint().x, beam.returnEndpoint().y)
         if beam.active and beam_clipped:
             player.take_damage(1)
