@@ -2,7 +2,7 @@ import pygame
 from constants import *
 
 class Beam(pygame.sprite.Sprite):
-    def __init__(self, rotation = 0, speed=50, length=PLAYAREA_RADIUS, width=5):
+    def __init__(self, rotation = 0, speed=50, length=PLAYAREA_RADIUS, width=10):
         super().__init__()
         self.center = pygame.Vector2(PLAYAREA_RADIUS, PLAYAREA_RADIUS)
         self.angle = rotation  # Initial angle in degrees

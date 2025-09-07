@@ -7,6 +7,8 @@ from playarea import Playarea
 from interface import Interface
 from damage_sources.beam import Beam
 from damage_sources.meteor import Meteor
+#from items.item import Item
+from items.item_spawner import ItemSpawner
 
 def main():
     pygame.init()
@@ -14,8 +16,14 @@ def main():
     dt = 0
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
+    items = pygame.sprite.Group()
     #asteroids = pygame.sprite.Group()
     #shots = pygame.sprite.Group()
+    beam = Beam()  # Example beam
+    updatable.add(beam)
+    drawable.add(beam)
+    interface = Interface(beam)
+    drawable.add(interface)
     Player.containers = (updatable, drawable)
     #Asteroid.containers = (asteroids, updatable, drawable)
     #AsteroidField.containers = (updatable)
@@ -23,12 +31,11 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     playarea = Playarea(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     drawable.add(playarea)
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50)  # Create player at center of screen
-    beam = Beam()  # Example beam
-    updatable.add(beam)
-    drawable.add(beam)
-    interface = Interface(player, beam)
-    drawable.add(interface)
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50, interface)  # Create player at center of screen
+    item_spawner = ItemSpawner(drawable, updatable, items)
+    updatable.add(item_spawner)
+    #item = Item((SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2), "fire", 1)
+    #drawable.add(item)
     #asteroid_field = AsteroidField()  # Create asteroid field
     #screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     while True:
@@ -39,6 +46,11 @@ def main():
         for item in drawable:
             item.draw(screen)
         updatable.update(dt)
+        for item in items:
+            if item.rect.colliderect(player.rect):
+                player.inventory.add_item(item)
+                item.kill()
+                item_spawner.activeItems -= 1
         '''for asteroid in asteroids:
             if asteroid.check_collision(player):
                 print("Game over!")

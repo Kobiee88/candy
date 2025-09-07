@@ -1,10 +1,12 @@
 from constants import *
 import pygame
 from circleshape import CircleShape
+from items.inventory import Inventory
+from interface import Interface
 #from shot import Shot
 
 class Player(CircleShape):
-    def __init__(self, x, y):
+    def __init__(self, x, y, interface):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0  # Initial rotation angle in degrees
         self.blink_timer = 0.0  # Timer for blink cooldown
@@ -13,6 +15,10 @@ class Player(CircleShape):
         self.health = PLAYER_MAX_HEALTH  # Player health
         self.image = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
+        self.inventory = Inventory(interface)
+        self.interface = interface
+        self.interface.health = self.health
+        self.interface.stamina = self.stamina
         #self.image = pygame.image.load("./images/player.png").convert_alpha()  # Use your image file here
         #self.image = pygame.transform.smoothscale(self.image, (self.radius*2, self.radius*2))  # Optional: scale to fit
 
@@ -74,6 +80,8 @@ class Player(CircleShape):
         if keys[pygame.K_SPACE]:
             self.blinkForward()
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
+        self.interface.health = self.health
+        self.interface.stamina = self.stamina
 
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
