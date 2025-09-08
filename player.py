@@ -1,5 +1,6 @@
 from constants import *
 import pygame
+import math
 from circleshape import CircleShape
 from items.inventory import Inventory
 from interface import Interface
@@ -21,6 +22,7 @@ class Player(CircleShape):
         self.interface = interface
         self.interface.health = self.health
         self.interface.stamina = self.stamina
+        self.immunity_timer = 0.0  # Timer for damage immunity
         #self.image = pygame.image.load("./images/player.png").convert_alpha()  # Use your image file here
         #self.image = pygame.transform.smoothscale(self.image, (self.radius*2, self.radius*2))  # Optional: scale to fit
 
@@ -65,6 +67,10 @@ class Player(CircleShape):
                 self.stamina += PLAYER_STAMINA_RECOVERY_RATE * dt
                 if self.stamina > PLAYER_MAX_STAMINA:
                     self.stamina = PLAYER_MAX_STAMINA
+        
+        if self.immunity_timer > 0:
+            self.immunity_timer -= dt
+            self.imageFlicker(dt)
 
         self.rotate(dt)
 
@@ -123,7 +129,10 @@ class Player(CircleShape):
         return 1.0
     
     def take_damage(self, amount):
+        if self.immunity_timer > 0:
+            return  # Still immune, ignore damage
         self.health -= amount
+        self.immunity_timer = PLAYER_IMMUNITY_TIME
         if self.health < 0:
             self.health = 0
         # You can add additional logic here, such as triggering a death event if health reaches 0
@@ -132,4 +141,11 @@ class Player(CircleShape):
         removed_item = self.inventory.remove_item(index)
         if removed_item:
             self.item_spawner.spawn_item(removed_item.name, removed_item.level, self.position + pygame.Vector2(0, -self.radius*2).rotate(self.rotation))
+
+    # Not working as intended yet - Player has no own surface
+    def imageFlicker(self, dt):
+        alpha = self.image.get_alpha()
+        alpha = 128 + 127 * math.sin((PLAYER_IMMUNITY_TIME - self.immunity_timer) * 20)
+        self.interface.debugText = f"Alpha: {alpha:.2f}"
+        self.image.set_alpha(alpha)
 

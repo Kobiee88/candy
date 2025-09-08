@@ -11,6 +11,7 @@ class Item(pygame.sprite.Sprite):
         self.level = level
         self.item_spawner = item_spawner
         self.lifetime = ITEM_LIFETIME
+        self.pickup_cooldown = ITEM_PICKUP_COOLDOWN
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -20,3 +21,8 @@ class Item(pygame.sprite.Sprite):
         if self.lifetime <= 0:
             self.kill()
             self.item_spawner.activeItems -= 1
+        if self.pickup_cooldown > 0:
+            self.pickup_cooldown -= dt
+
+    def canBePickedUp(self):
+        return self.pickup_cooldown <= 0

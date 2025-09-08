@@ -10,6 +10,7 @@ class Interface:
         self.health = 0
         self.stamina = 0
         self.inventory = []  # Placeholder for inventory items
+        self.debugText = ""
 
     def draw(self, screen):
         self.staminaBar(screen)
@@ -18,6 +19,7 @@ class Interface:
         #if self.beam:
         #    self.displayBeamEndpointValues(screen)
         # For debugging: display beam endpoint values if a beam exists
+        self.debugConsole(screen)  # Add any debug text you want to display
         
 
     def add_internal(self, *args, **kwargs):
@@ -58,6 +60,12 @@ class Interface:
         endpoint = self.beam.returnEndpoint()
         endpoint_text = self.font.render(f'Beam Endpoint: ({int(endpoint.x)}, {int(endpoint.y)})', True, (255, 255, 255))
         screen.blit(endpoint_text, (15, 95))
+
+    def debugConsole(self, screen, text=None):
+        # Display beam endpoint coordinates for debugging
+        #endpoint = self.beam.returnEndpoint()
+        debug_text = self.font.render(f'DEBUG: ({self.debugText})', True, (255, 255, 255))
+        screen.blit(debug_text, (15, 95))
 
     def draw_inventory(self, screen):
         x_offset = 0

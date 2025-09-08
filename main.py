@@ -56,6 +56,8 @@ def main():
             item.draw(screen)
         updatable.update(dt)
         for item in items:
+            if not item.canBePickedUp():
+                continue
             if item.rect.colliderect(player.rect):
                 if not player.inventory.isFull():
                     player.inventory.add_item(item)
