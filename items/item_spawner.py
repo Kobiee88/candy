@@ -14,16 +14,21 @@ class ItemSpawner:
         self.item_container = item_container
         self.spawn_cooldown = 0
 
-    def spawn_item(self, name, level):
+    def spawn_item(self, name, level, position=None):
         angle = random.uniform(0, 360)
         distance = random.uniform(0, PLAYAREA_RADIUS - ITEM_RADIUS)
         spawn_x = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).x
         spawn_y = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).y
+        if position:
+            spawn_x = position.x
+            spawn_y = position.y
         item = Item((spawn_x, spawn_y), self, name, level)
         self.activeItems += 1
         self.spawn_cooldown = ITEM_SPAWN_COOLDOWN
         #self.items.add(item)
-        return item
+        self.draw_container.add(item)
+        self.update_container.add(item)
+        self.item_container.add(item)
 
     def update(self, dt):
         #self.items.update(dt)
@@ -34,10 +39,7 @@ class ItemSpawner:
             return
         if random.random() > ITEM_SPAWN_CHANCE:
             return
-        item = self.spawn_item("fire", 1)
-        self.draw_container.add(item)
-        self.update_container.add(item)
-        self.item_container.add(item)
+        self.spawn_item("fire", 1)
 
     def add_internal(self, *args, **kwargs):
         pass  # or implement as needed

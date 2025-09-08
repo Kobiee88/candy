@@ -14,12 +14,13 @@ class Inventory:
             return True
         return False
 
-    def remove_item(self, item):
-        if item in self.items:
-            self.items.remove(item)
+    def remove_item(self, index):
+        if 0 <= index < len(self.items):
+            item = self.items[index]
+            self.items.pop(index)
             self.updateInventory()
-            return True
-        return False
+            return item
+        return None
 
     def has_item(self, item_name):
         return any(item.name == item_name for item in self.items)
@@ -35,3 +36,6 @@ class Inventory:
 
     def updateInventory(self):
         self.interface.inventory = self.items
+
+    def isFull(self):
+        return len(self.items) >= INVENTORY_SIZE

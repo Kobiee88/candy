@@ -62,10 +62,18 @@ class Interface:
     def draw_inventory(self, screen):
         x_offset = 0
         for i in range(INVENTORY_SIZE):
-            pygame.draw.rect(screen, (50, 50, 50), (SCREEN_WIDTH - 60 * INVENTORY_SIZE + x_offset, SCREEN_HEIGHT - 60, 50, 50))  # Draw slot
+            text_color = (200, 200, 200)
+            if i < len(self.inventory):
+                item_image = pygame.transform.smoothscale(self.inventory[i].image, (50, 50))
+                screen.blit(item_image, (SCREEN_WIDTH - 60 * INVENTORY_SIZE + x_offset, SCREEN_HEIGHT - 60))
+                text_color = (10, 10, 10)  # Change text color for better visibility
+            else:
+                # Draw slot rectangle
+                slot_rect = pygame.Rect(SCREEN_WIDTH - 60 * INVENTORY_SIZE + x_offset, SCREEN_HEIGHT - 60, 50, 50)
+                pygame.draw.rect(screen, (50, 50, 50), slot_rect)
+            # Draw slot number
+            num_text = self.font.render(str(i + 1), True, text_color)
+            # Position number in the top-left of the slot with a small margin
+            screen.blit(num_text, (SCREEN_WIDTH - 60 * INVENTORY_SIZE + x_offset + 4, SCREEN_HEIGHT - 60 + 2))
             x_offset += 60
-        x_offset = 0
-        for item in self.inventory:
-            item_image = pygame.transform.smoothscale(item.image, (40, 40))
-            screen.blit(item_image, (SCREEN_WIDTH - 60 * INVENTORY_SIZE + x_offset + 5, SCREEN_HEIGHT - 55))
-            x_offset += 60
+        

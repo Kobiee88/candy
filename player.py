@@ -3,10 +3,11 @@ import pygame
 from circleshape import CircleShape
 from items.inventory import Inventory
 from interface import Interface
+from items.item_spawner import ItemSpawner
 #from shot import Shot
 
 class Player(CircleShape):
-    def __init__(self, x, y, interface):
+    def __init__(self, x, y, interface, item_spawner):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0  # Initial rotation angle in degrees
         self.blink_timer = 0.0  # Timer for blink cooldown
@@ -16,6 +17,7 @@ class Player(CircleShape):
         self.image = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
         self.inventory = Inventory(interface)
+        self.item_spawner = item_spawner
         self.interface = interface
         self.interface.health = self.health
         self.interface.stamina = self.stamina
@@ -125,4 +127,9 @@ class Player(CircleShape):
         if self.health < 0:
             self.health = 0
         # You can add additional logic here, such as triggering a death event if health reaches 0
+
+    def dropItem(self, index):
+        removed_item = self.inventory.remove_item(index)
+        if removed_item:
+            self.item_spawner.spawn_item(removed_item.name, removed_item.level, self.position + pygame.Vector2(0, -self.radius*2).rotate(self.rotation))
 

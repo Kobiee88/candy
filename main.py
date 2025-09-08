@@ -31,9 +31,9 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     playarea = Playarea(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     drawable.add(playarea)
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50, interface)  # Create player at center of screen
     item_spawner = ItemSpawner(drawable, updatable, items)
     updatable.add(item_spawner)
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50, interface, item_spawner)  # Create player at center of screen
     #item = Item((SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2), "fire", 1)
     #drawable.add(item)
     #asteroid_field = AsteroidField()  # Create asteroid field
@@ -42,15 +42,25 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
+                if event.key == pygame.K_1:
+                    player.dropItem(0)
+                if event.key == pygame.K_2:
+                    player.dropItem(1)
+                if event.key == pygame.K_3:
+                    player.dropItem(2)
         pygame.Surface.fill(screen, (0, 0, 0))  # Fill the screen with black
         for item in drawable:
             item.draw(screen)
         updatable.update(dt)
         for item in items:
             if item.rect.colliderect(player.rect):
-                player.inventory.add_item(item)
-                item.kill()
-                item_spawner.activeItems -= 1
+                if not player.inventory.isFull():
+                    player.inventory.add_item(item)
+                    item.kill()
+                    item_spawner.activeItems -= 1
         '''for asteroid in asteroids:
             if asteroid.check_collision(player):
                 print("Game over!")
