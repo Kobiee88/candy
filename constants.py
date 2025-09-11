@@ -22,7 +22,7 @@ METEOR_SPAWN_TIMER = 3.0  # seconds
 METEOR_DAMAGE = 10
 METEOR_SPAWN_CHANCE = 0.03  # Chance of spawning a meteor each frame (if conditions are met)
 
-ITEM_RADIUS = 15
+ITEM_RADIUS = 30
 ITEM_SPAWN_CHANCE = 0.01  # Chance of spawning an item each frame
 ITEM_SPAWN_COOLDOWN = 3.0  # seconds
 ITEM_LIFETIME = 20.0  # seconds
@@ -30,3 +30,5 @@ ITEM_LIMIT = 5  # Maximum number of items in the play area
 ITEM_PICKUP_COOLDOWN = 1.0  # seconds
 
 INVENTORY_SIZE = 3  # Number of item slots in the inventory
+
+FORGE_RADIUS = 50

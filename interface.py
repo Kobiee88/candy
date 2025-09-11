@@ -4,22 +4,20 @@ from damage_sources.beam import Beam
 
 class Interface:
     def __init__(self, beam: Beam = None):
-        #self.player = player
         self.beam = beam
         self.font = pygame.font.SysFont(None, 34)
         self.health = 0
         self.stamina = 0
         self.inventory = []  # Placeholder for inventory items
         self.debugText = ""
+        self.timer = 0
 
     def draw(self, screen):
         self.staminaBar(screen)
         self.healthBar(screen)
         self.draw_inventory(screen)
-        #if self.beam:
-        #    self.displayBeamEndpointValues(screen)
-        # For debugging: display beam endpoint values if a beam exists
         self.debugConsole(screen)  # Add any debug text you want to display
+        self.displayTimer(screen)
         
 
     def add_internal(self, *args, **kwargs):
@@ -84,4 +82,10 @@ class Interface:
             # Position number in the top-left of the slot with a small margin
             screen.blit(num_text, (SCREEN_WIDTH - 60 * INVENTORY_SIZE + x_offset + 4, SCREEN_HEIGHT - 60 + 2))
             x_offset += 60
-        
+
+    def update(self, dt):
+        self.timer += dt
+    
+    def displayTimer(self, screen):
+        timer_text = self.font.render(f'Time: {self.timer:.2f} s', True, (255, 255, 255))
+        screen.blit(timer_text, (SCREEN_WIDTH - 150, 15))

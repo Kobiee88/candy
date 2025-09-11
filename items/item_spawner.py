@@ -13,10 +13,15 @@ class ItemSpawner:
         self.update_container = update_container
         self.item_container = item_container
         self.spawn_cooldown = 0
+        self.spawnable_items = [
+            {"name": "fire", "level": 1, "probability": 0.5},
+            {"name": "water", "level": 1, "probability": 0.5},
+            {"name": "nature", "level": 1, "probability": 0.5},
+        ]
 
     def spawn_item(self, name, level, position=None):
         angle = random.uniform(0, 360)
-        distance = random.uniform(0, PLAYAREA_RADIUS - ITEM_RADIUS)
+        distance = random.uniform(FORGE_RADIUS + ITEM_RADIUS, PLAYAREA_RADIUS - ITEM_RADIUS)
         spawn_x = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).x
         spawn_y = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).y
         if position:
@@ -31,7 +36,6 @@ class ItemSpawner:
         self.item_container.add(item)
 
     def update(self, dt):
-        #self.items.update(dt)
         self.spawn_cooldown -= dt
         if self.spawn_cooldown > 0:
             return
@@ -39,7 +43,16 @@ class ItemSpawner:
             return
         if random.random() > ITEM_SPAWN_CHANCE:
             return
-        self.spawn_item("fire", 1)
+        if len(self.spawnable_items) == 0:
+            return
+        total_probability = sum(item["probability"] for item in self.spawnable_items)
+        rand_value = random.uniform(0, total_probability)
+        cumulative_probability = 0
+        for item in self.spawnable_items:
+            cumulative_probability += item["probability"]
+            if rand_value <= cumulative_probability:
+                self.spawn_item(item["name"], item["level"])
+                break
 
     def add_internal(self, *args, **kwargs):
         pass  # or implement as needed

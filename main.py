@@ -9,6 +9,7 @@ from damage_sources.beam import Beam
 from damage_sources.meteor import Meteor
 #from items.item import Item
 from items.item_spawner import ItemSpawner
+from items.forge import Forge
 
 def main():
     pygame.init()
@@ -17,23 +18,22 @@ def main():
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     items = pygame.sprite.Group()
-    #asteroids = pygame.sprite.Group()
-    #shots = pygame.sprite.Group()
     beam = Beam()  # Example beam
     updatable.add(beam)
     drawable.add(beam)
     interface = Interface(beam)
     drawable.add(interface)
+    updatable.add(interface)
     Player.containers = (updatable, drawable)
-    #Asteroid.containers = (asteroids, updatable, drawable)
-    #AsteroidField.containers = (updatable)
-    #Shot.containers = (shots, updatable, drawable)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     playarea = Playarea(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     drawable.add(playarea)
     item_spawner = ItemSpawner(drawable, updatable, items)
     updatable.add(item_spawner)
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50, interface, item_spawner)  # Create player at center of screen
+    forge = Forge()
+    drawable.add(forge)
+    updatable.add(forge)
     #item = Item((SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2), "fire", 1)
     #drawable.add(item)
     #asteroid_field = AsteroidField()  # Create asteroid field
@@ -74,7 +74,7 @@ def main():
                         asteroid.split()'''
         if random.random() < METEOR_SPAWN_CHANCE and len(updatable.sprites()) < 10:
             angle = random.uniform(0, 360)
-            distance = random.uniform(0, PLAYAREA_RADIUS)
+            distance = random.uniform(FORGE_RADIUS + METEOR_RADIUS, PLAYAREA_RADIUS)
             spawn_x = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).x
             spawn_y = PLAYAREA_RADIUS + distance * pygame.math.Vector2(1, 0).rotate(angle).y
             meteor = Meteor((spawn_x, spawn_y), player)
