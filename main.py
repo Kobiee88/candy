@@ -21,19 +21,20 @@ def main():
     beam = Beam()  # Example beam
     updatable.add(beam)
     drawable.add(beam)
-    interface = Interface(beam)
+    interface = Interface()
     drawable.add(interface)
     updatable.add(interface)
-    Player.containers = (updatable, drawable)
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     playarea = Playarea(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     drawable.add(playarea)
     item_spawner = ItemSpawner(drawable, updatable, items)
     updatable.add(item_spawner)
-    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 50, interface, item_spawner)  # Create player at center of screen
-    forge = Forge()
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 200, interface, item_spawner)  # Create player at center of screen
+    forge = Forge(interface, player)
     drawable.add(forge)
     updatable.add(forge)
+    drawable.add(player)
+    updatable.add(player)
     #item = Item((SCREEN_WIDTH / 2 + 100, SCREEN_HEIGHT / 2), "fire", 1)
     #drawable.add(item)
     #asteroid_field = AsteroidField()  # Create asteroid field
@@ -63,15 +64,6 @@ def main():
                     player.inventory.add_item(item)
                     item.kill()
                     item_spawner.activeItems -= 1
-        '''for asteroid in asteroids:
-            if asteroid.check_collision(player):
-                print("Game over!")
-                sys.exit()
-            else:
-                for shot in shots:
-                    if asteroid.check_collision(shot):
-                        shot.kill()
-                        asteroid.split()'''
         if random.random() < METEOR_SPAWN_CHANCE and len(updatable.sprites()) < 10:
             angle = random.uniform(0, 360)
             distance = random.uniform(FORGE_RADIUS + METEOR_RADIUS, PLAYAREA_RADIUS)

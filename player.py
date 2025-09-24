@@ -3,8 +3,6 @@ import pygame
 import math
 from circleshape import CircleShape
 from items.inventory import Inventory
-from interface import Interface
-from items.item_spawner import ItemSpawner
 #from shot import Shot
 
 class Player(CircleShape):
@@ -15,7 +13,10 @@ class Player(CircleShape):
         self.stamina = PLAYER_MAX_STAMINA  # Player stamina for sprinting
         self.stamina_recovery_cooldown = 0.0
         self.health = PLAYER_MAX_HEALTH  # Player health
-        self.image = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
+        #self.image = pygame.Surface((self.radius*2, self.radius*2), pygame.SRCALPHA)
+        self.image = pygame.image.load("./images/player.png").convert_alpha()  # Use your image file here
+        self.image = pygame.transform.smoothscale(self.image, (self.radius*2, self.radius*2))  # Optional: scale to fit
+        self.image_rotation_offset = 0  # 0 if sprite faces up. try -90 if it faces right, +90 if it faces left.
         self.rect = self.image.get_rect(center=(self.position.x, self.position.y))
         self.inventory = Inventory(interface)
         self.item_spawner = item_spawner
@@ -23,31 +24,38 @@ class Player(CircleShape):
         self.interface.health = self.health
         self.interface.stamina = self.stamina
         self.immunity_timer = 0.0  # Timer for damage immunity
-        #self.image = pygame.image.load("./images/player.png").convert_alpha()  # Use your image file here
-        #self.image = pygame.transform.smoothscale(self.image, (self.radius*2, self.radius*2))  # Optional: scale to fit
 
     # in the player class
-    def triangle(self):
+    '''def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
         a = self.position + forward * self.radius
         b = self.position - forward * self.radius - right
         c = self.position - forward * self.radius + right
-        return [a, b, c]
+        return [a, b, c]'''
 
     def draw(self, screen):
-        points = self.triangle()
-        pygame.draw.polygon(screen, (255, 255, 255), points, 2)  # Draw the player triangle in white
-        #rotated_image = pygame.transform.rotate(self.image, self.rotation)
-        #rect = rotated_image.get_rect(center=self.position)
-        #screen.blit(rotated_image, rect)
+        #points = self.triangle()
+        #pygame.draw.polygon(screen, (255, 255, 255), points, 2)  # Draw the player triangle in white
+        rotated_image = pygame.transform.rotate(self.image, -self.rotation + self.image_rotation_offset)
+        rect = rotated_image.get_rect(center=self.position)
+        screen.blit(rotated_image, rect)
 
-    def rotate(self, dt):
+    def rotate(self, dt, camera_offset=pygame.Vector2(0, 0)):
         mouse_pos = pygame.mouse.get_pos()
-        direction = pygame.Vector2(mouse_pos) - self.position
-        target_rotation = -direction.angle_to(pygame.Vector2(0, 1))
+        # Convert player world position to screen position if you use a camera offset
+        screen_pos = self.position - camera_offset
+        direction = pygame.Vector2(mouse_pos) - screen_pos
+        if direction.length_squared() == 0:
+            return
 
-        # Calculate shortest angle difference
+        # Use the base forward vector that matches your sprite.
+        # If your image faces up, use (0, -1). If it faces down, use (0, 1).
+        base_forward = pygame.Vector2(0, -1)
+
+        target_rotation = base_forward.angle_to(direction)
+
+        # Calculate shortest angle difference and clamp rotation speed
         diff = (target_rotation - self.rotation + 180) % 360 - 180
         max_step = PLAYER_TURN_SPEED * dt
         if abs(diff) < max_step:
@@ -92,14 +100,15 @@ class Player(CircleShape):
         self.interface.stamina = self.stamina
 
     def move(self, dt):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        forward = pygame.Vector2(0, -1).rotate(self.rotation)
         new_position = self.position + forward * PLAYER_SPEED * dt
         playarea_center = pygame.Vector2(PLAYAREA_RADIUS, PLAYAREA_RADIUS)
         if (new_position - playarea_center).length() + self.radius < PLAYAREA_RADIUS:
             self.position = new_position
 
     def strafe(self, dt):
-        right = pygame.Vector2(0, 1).rotate(self.rotation + 90)
+        forward = pygame.Vector2(0, -1).rotate(self.rotation)
+        right = forward.rotate(90)
         new_position = self.position + right * PLAYER_SPEED * dt / 2
         playarea_center = pygame.Vector2(PLAYAREA_RADIUS, PLAYAREA_RADIUS)
         if (new_position - playarea_center).length() + self.radius < PLAYAREA_RADIUS:
@@ -107,16 +116,18 @@ class Player(CircleShape):
 
     def blinkForward(self):
         if self.blink_timer <= 0:
-            forward = pygame.Vector2(0, 1).rotate(self.rotation)
+            forward = pygame.Vector2(0, -1).rotate(self.rotation)
             new_position = self.position + forward * PLAYER_SPEED * 0.8
             playarea_center = pygame.Vector2(PLAYAREA_RADIUS, PLAYAREA_RADIUS)
             if (new_position - playarea_center).length() + self.radius < PLAYAREA_RADIUS:
                 self.position = new_position
             else:
                 # Calculate maximum blink distance to stay within play area
-                direction = (new_position - playarea_center).normalize()
-                max_distance = PLAYAREA_RADIUS - self.radius - (self.position - playarea_center).length()
-                self.position += direction * max_distance
+                dir_to_edge = (new_position - playarea_center)
+                if dir_to_edge.length() != 0:
+                    direction = dir_to_edge.normalize()
+                    max_distance = PLAYAREA_RADIUS - self.radius - (self.position - playarea_center).length()
+                    self.position += direction * max_distance
             self.blink_timer = PLAYER_BLINK_COOLDOWN
 
     def sprint(self, dt):

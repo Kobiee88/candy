@@ -3,14 +3,16 @@ from constants import *
 from damage_sources.beam import Beam
 
 class Interface:
-    def __init__(self, beam: Beam = None):
-        self.beam = beam
+    def __init__(self):
         self.font = pygame.font.SysFont(None, 34)
         self.health = 0
         self.stamina = 0
         self.inventory = []  # Placeholder for inventory items
         self.debugText = ""
         self.timer = 0
+        self.points = 0
+        self.requestedItem = None
+        self.requestCooldown = 0.0
 
     def draw(self, screen):
         self.staminaBar(screen)
@@ -18,7 +20,8 @@ class Interface:
         self.draw_inventory(screen)
         self.debugConsole(screen)  # Add any debug text you want to display
         self.displayTimer(screen)
-        
+        self.displayPoints(screen)
+        self.drawRequestedItem(screen)
 
     def add_internal(self, *args, **kwargs):
         pass  # or implement as needed
@@ -53,15 +56,7 @@ class Interface:
         health_text = self.font.render(f'Health: {self.health} / {PLAYER_MAX_HEALTH}', True, (0, 0, 0))
         screen.blit(health_text, (health_bar_x + 5, health_bar_y + 2))
 
-    def displayBeamEndpointValues(self, screen):
-        # Display beam endpoint coordinates for debugging
-        endpoint = self.beam.returnEndpoint()
-        endpoint_text = self.font.render(f'Beam Endpoint: ({int(endpoint.x)}, {int(endpoint.y)})', True, (255, 255, 255))
-        screen.blit(endpoint_text, (15, 95))
-
     def debugConsole(self, screen, text=None):
-        # Display beam endpoint coordinates for debugging
-        #endpoint = self.beam.returnEndpoint()
         debug_text = self.font.render(f'DEBUG: ({self.debugText})', True, (255, 255, 255))
         screen.blit(debug_text, (15, 95))
 
@@ -83,9 +78,36 @@ class Interface:
             screen.blit(num_text, (SCREEN_WIDTH - 60 * INVENTORY_SIZE + x_offset + 4, SCREEN_HEIGHT - 60 + 2))
             x_offset += 60
 
+    def drawRequestedItem(self, screen):
+        request_text = self.font.render(f'CENTER:', True, (255, 255, 255))
+        screen.blit(request_text, (30, SCREEN_HEIGHT - 170))
+        if self.requestedItem:
+            item_image = pygame.transform.smoothscale(self.requestedItem.image, (100, 100))
+            screen.blit(item_image, (30, SCREEN_HEIGHT - 140))
+            item_text = self.font.render(f'Requested: {self.requestedItem.name.capitalize()} ({self.requestedItem.level})', True, (255, 255, 255))
+            screen.blit(item_text, (30, SCREEN_HEIGHT - 30))
+        else:
+            slot_rect = pygame.Rect(30, SCREEN_HEIGHT - 140, 100, 100)
+            pygame.draw.rect(screen, (50, 50, 50), slot_rect)
+            cooldown_text = self.font.render(f'{self.requestCooldown:.1f}s', True, (255, 255, 255))
+            screen.blit(cooldown_text, (55, SCREEN_HEIGHT - 115))
+
     def update(self, dt):
         self.timer += dt
     
     def displayTimer(self, screen):
         timer_text = self.font.render(f'Time: {self.timer:.2f} s', True, (255, 255, 255))
         screen.blit(timer_text, (SCREEN_WIDTH - 150, 15))
+
+    def displayPoints(self, screen):
+        points_text = self.font.render(f'Points: {self.points}', True, (255, 255, 255))
+        screen.blit(points_text, (SCREEN_WIDTH - 150, 55))
+
+    def updateRequestedItem(self, item):
+        self.requestedItem = item
+
+    def updateRequestCooldown(self, cooldown):
+        self.requestCooldown = cooldown
+
+    def updatePoints(self, points):
+        self.points += points
