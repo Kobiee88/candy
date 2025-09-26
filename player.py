@@ -25,18 +25,7 @@ class Player(CircleShape):
         self.interface.stamina = self.stamina
         self.immunity_timer = 0.0  # Timer for damage immunity
 
-    # in the player class
-    '''def triangle(self):
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
-        a = self.position + forward * self.radius
-        b = self.position - forward * self.radius - right
-        c = self.position - forward * self.radius + right
-        return [a, b, c]'''
-
     def draw(self, screen):
-        #points = self.triangle()
-        #pygame.draw.polygon(screen, (255, 255, 255), points, 2)  # Draw the player triangle in white
         rotated_image = pygame.transform.rotate(self.image, -self.rotation + self.image_rotation_offset)
         rect = rotated_image.get_rect(center=self.position)
         screen.blit(rotated_image, rect)
@@ -117,7 +106,7 @@ class Player(CircleShape):
     def blinkForward(self):
         if self.blink_timer <= 0:
             forward = pygame.Vector2(0, -1).rotate(self.rotation)
-            new_position = self.position + forward * PLAYER_SPEED * 0.8
+            new_position = self.position + forward * PLAYER_SPEED * 1.1
             playarea_center = pygame.Vector2(PLAYAREA_RADIUS, PLAYAREA_RADIUS)
             if (new_position - playarea_center).length() + self.radius < PLAYAREA_RADIUS:
                 self.position = new_position
@@ -157,6 +146,6 @@ class Player(CircleShape):
     def imageFlicker(self, dt):
         alpha = self.image.get_alpha()
         alpha = 128 + 127 * math.sin((PLAYER_IMMUNITY_TIME - self.immunity_timer) * 20)
-        self.interface.debugText = f"Alpha: {alpha:.2f}"
+        #self.interface.debugText = f"Alpha: {alpha:.2f}"
         self.image.set_alpha(alpha)
 
